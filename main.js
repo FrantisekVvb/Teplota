@@ -558,9 +558,9 @@ function normalizeSubject(subject) {
 function setSubject(subject) {
   const nextSubject = normalizeSubject(subject);
   if (nextSubject !== activeSubject) {
-    const temp = currentTemp();
     activeSubject = nextSubject;
-    heatElapsedMs = progressFromTemp(temp) * heatDurationMs();
+    heatElapsedMs = 0;
+    setBurnerOn(false);
   }
 
   waterSubject.hidden = activeSubject !== 'water';
@@ -572,6 +572,8 @@ function setSubject(subject) {
     button.classList.toggle('is-active', isActive);
     button.setAttribute('aria-pressed', String(isActive));
   });
+
+  applySimulationState();
 
   if (activeSubject === 'water') {
     resizeWaterParticleCanvas();
