@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teplota</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+</head>
+<body>
+  <main class="scene" aria-label="Simulace ohřevu vody v hrníčku">
+    <header class="scene-header">
+      <h1>Teplota</h1>
+      <div class="subject-control" role="group" aria-label="Těleso na hořáku">
+        <button
+          type="button"
+          class="subject-btn"
+          data-subject="gold"
+          aria-pressed="false"
+        >
+          Zlato
+        </button>
+        <button
+          type="button"
+          class="subject-btn is-active"
+          data-subject="water"
+          aria-pressed="true"
+        >
+          Voda
+        </button>
+        <button
+          type="button"
+          class="subject-btn"
+          data-subject="gas"
+          aria-pressed="false"
+        >
+          Plyn
+        </button>
+      </div>
+    </header>
+
+    <div class="stage">
+      <div id="thermometer" class="thermometer" aria-label="Teploměr">
+        <svg viewBox="0 0 56 130" aria-hidden="true">
+          <rect class="tube-bg" x="18" y="8" width="20" height="118" rx="10" />
+          <rect class="tube-inner" x="22" y="12" width="12" height="110" rx="6" />
+          <rect id="mercury-column" class="mercury" x="24" y="118" width="8" height="4" rx="4" />
+        </svg>
+        <div id="temp-readout" class="temp-readout">teplota</div>
+      </div>
+
+      <div class="cup-wrap" id="water-subject">
+        <div id="lottie" class="lottie" aria-label="Hrníček s vodou"></div>
+        <div class="water-detail" aria-label="Detail částic vody">
+          <canvas id="water-particles" class="water-particles"></canvas>
+        </div>
+      </div>
+
+      <div class="gold-brick-wrap" id="gold-subject" hidden>
+        <div class="gold-scene">
+          <img
+            class="gold-brick"
+            src="assets/gold-brick.svg"
+            width="148"
+            height="88"
+            alt="Zlatá cihla"
+          />
+          <div class="gold-detail" aria-label="Detail částic zlata">
+            <canvas id="gold-particles" class="gold-particles"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="gas-wrap" id="gas-subject" hidden>
+        <div class="gas-scene">
+          <object
+            id="gas-vessel"
+            class="gas-vessel"
+            type="image/svg+xml"
+            data="assets/gas-vessel.svg"
+            width="320"
+            height="250"
+            aria-label="Nádoba s plynem"
+          ></object>
+          <div class="gas-detail" aria-label="Detail částic plynu">
+            <canvas id="gas-particles" class="gas-particles"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="burner-wrap">
+        <object
+          id="burner"
+          class="burner"
+          type="image/svg+xml"
+          data="assets/burner.svg"
+          width="113"
+          height="116"
+          aria-label="Hořák"
+        ></object>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button
+        type="button"
+        id="burner-toggle"
+        class="burner-toggle"
+        aria-pressed="false"
+      >
+        Zapnout hořák
+      </button>
+    </div>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>

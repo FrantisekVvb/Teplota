@@ -1,0 +1,13 @@
+{
+  "name": "teplota",
+  "version": "1.0.0",
+  "description": "Teplota — ohřev vody v hrníčku s hořákem a teploměrem",
+  "license": "MIT",
+  "scripts": {
+    "start": "npx --yes serve . -l 3473",
+    "dev": "npm start"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
