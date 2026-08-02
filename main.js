@@ -190,6 +190,12 @@ function resizeParticleCanvas(canvas) {
   canvas.height = Math.round(size * dpr);
 }
 
+function clipParticleCanvasToCircle(ctx, size) {
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+  ctx.clip();
+}
+
 function resizeGoldParticleCanvas() {
   resizeParticleCanvas(goldParticlesCanvas);
 }
@@ -237,6 +243,8 @@ function drawParticleDetail({
   const stepY = span / (rows - 1);
 
   ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  clipParticleCanvasToCircle(ctx, size);
 
   for (const particle of grid) {
     const baseX = margin + particle.col * stepX;
@@ -271,6 +279,8 @@ function drawParticleDetail({
     ctx.strokeStyle = stroke;
     ctx.stroke();
   }
+
+  ctx.restore();
 }
 
 function gasChaosFromTemp(temp) {
@@ -305,6 +315,8 @@ function drawGasParticleDetail(deltaMs) {
   const moveScale = 0.02 + motion * 0.0048;
 
   ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  clipParticleCanvasToCircle(ctx, size);
 
   for (const particle of gasParticles) {
     particle.vx += (Math.random() - 0.5) * wander * dt;
@@ -347,6 +359,8 @@ function drawGasParticleDetail(deltaMs) {
     ctx.strokeStyle = GAS_PARTICLE_STROKE;
     ctx.stroke();
   }
+
+  ctx.restore();
 }
 
 function drawGoldParticleDetail(timeMs) {
@@ -386,6 +400,8 @@ function drawWaterParticleDetail(deltaMs) {
   const drawRadius = PARTICLE_RADIUS_LARGE * scale;
 
   ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  clipParticleCanvasToCircle(ctx, size);
 
   for (const particle of waterParticles) {
     particle.vx += (Math.random() - 0.5) * wander * dt;
@@ -424,6 +440,8 @@ function drawWaterParticleDetail(deltaMs) {
     ctx.strokeStyle = WATER_PARTICLE_STROKE;
     ctx.stroke();
   }
+
+  ctx.restore();
 }
 
 function tempFromProgress(progress) {
