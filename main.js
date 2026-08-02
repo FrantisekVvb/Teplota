@@ -183,18 +183,41 @@ function buildGasParticles() {
 function resizeParticleCanvas(canvas) {
   if (!canvas) return;
 
-  const rect = canvas.getBoundingClientRect();
-  const size = Math.max(1, Math.round(Math.min(rect.width, rect.height)));
+  const host = canvas.parentElement || canvas;
+  const rect = host.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.round(size * dpr);
-  canvas.height = Math.round(size * dpr);
+  const cssSize = Math.max(1, Math.min(rect.width, rect.height));
+  const pixelSize = Math.max(1, Math.round(cssSize * dpr));
+  canvas.width = pixelSize;
+  canvas.height = pixelSize;
 }
 
 function clipParticleCanvasToCircle(ctx, canvas) {
-  const size = canvas.width;
+  const rect = canvas.getBoundingClientRect();
+  const pixelW = canvas.width;
+  const pixelH = canvas.height;
+  const cssW = Math.max(rect.width, 1);
+  const cssH = Math.max(rect.height, 1);
+  const scaleX = pixelW / cssW;
+  const scaleY = pixelH / cssH;
+  const cx = cssW / 2;
+  const cy = cssH / 2;
+  const rx = cssW / 2;
+  const ry = cssH / 2;
+
   ctx.beginPath();
-  ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+  if (Math.abs(cssW - cssH) < 0.5) {
+    ctx.arc(cx * scaleX, cy * scaleY, Math.min(rx, ry) * scaleX, 0, Math.PI * 2);
+  } else {
+    ctx.ellipse(cx * scaleX, cy * scaleY, rx * scaleX, ry * scaleY, 0, 0, Math.PI * 2);
+  }
   ctx.clip();
+}
+
+function particleCanvasScale(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const cssSize = Math.max(rect.width, rect.height, 1);
+  return canvas.width / cssSize;
 }
 
 function resizeGoldParticleCanvas() {
@@ -235,7 +258,7 @@ function drawParticleDetail({
   if (!ctx) return;
 
   const size = canvas.width;
-  const scale = size / (canvas.getBoundingClientRect().width || size);
+  const scale = particleCanvasScale(canvas);
   const amplitude = (amplitudeBase + motion * amplitudeScale) * scale;
   const basePhase = timeMs * 0.0035;
   const margin = 16 * scale;
@@ -305,7 +328,7 @@ function drawGasParticleDetail(deltaMs) {
   if (!ctx) return;
 
   const size = canvas.width;
-  const scale = size / (canvas.getBoundingClientRect().width || size);
+  const scale = particleCanvasScale(canvas);
   const temp = currentTemp();
   const motion = gasMotionFromTemp(temp);
   const chaos = gasChaosFromTemp(temp);
@@ -389,7 +412,7 @@ function drawWaterParticleDetail(deltaMs) {
   if (!ctx) return;
 
   const size = canvas.width;
-  const scale = size / (canvas.getBoundingClientRect().width || size);
+  const scale = particleCanvasScale(canvas);
   const temp = currentTemp();
   const motion = speedFromTemp(temp);
   const chaos = gasChaosFromTemp(temp);
