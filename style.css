@@ -710,7 +710,7 @@ button {
 
 .gold-detail {
   width: calc(min(92vw, 560px) * 0.346);
-  height: calc(min(92vw, 560px) * 0.346);
+  aspect-ratio: 1;
   border: 4.5px solid #2a2a2a;
   border-radius: 50%;
   background: #fff6d6;
@@ -752,7 +752,7 @@ button {
 
 .gas-detail {
   width: calc(min(92vw, 560px) * 0.346);
-  height: calc(min(92vw, 560px) * 0.346);
+  aspect-ratio: 1;
   border: 4.5px solid #2a2a2a;
   border-radius: 50%;
   background: #d6f5d6;
