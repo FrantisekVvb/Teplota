@@ -8,110 +8,314 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 </head>
 <body>
-  <main class="scene" aria-label="Simulace ohřevu vody v hrníčku">
-    <header class="scene-header">
-      <h1>Teplota</h1>
-      <div class="subject-control" role="group" aria-label="Těleso na hořáku">
-        <button
-          type="button"
-          class="subject-btn"
-          data-subject="gold"
-          aria-pressed="false"
-        >
-          Zlato
-        </button>
-        <button
-          type="button"
-          class="subject-btn is-active"
-          data-subject="water"
-          aria-pressed="true"
-        >
-          Voda
-        </button>
-        <button
-          type="button"
-          class="subject-btn"
-          data-subject="gas"
-          aria-pressed="false"
-        >
-          Plyn
-        </button>
-      </div>
-    </header>
-
-    <div class="stage">
-      <div id="thermometer" class="thermometer" aria-label="Teploměr">
-        <svg viewBox="0 0 56 130" aria-hidden="true">
-          <rect class="tube-bg" x="18" y="8" width="20" height="118" rx="10" />
-          <rect class="tube-inner" x="22" y="12" width="12" height="110" rx="6" />
-          <rect id="mercury-column" class="mercury" x="24" y="118" width="8" height="4" rx="4" />
-        </svg>
-        <div id="temp-readout" class="temp-readout">teplota</div>
-      </div>
-
-      <div class="cup-wrap" id="water-subject">
-        <div id="lottie" class="lottie" aria-label="Hrníček s vodou"></div>
-        <div class="water-detail" aria-label="Detail částic vody">
-          <canvas id="water-particles" class="water-particles"></canvas>
+  <div class="app-root" data-app-mode="heating">
+    <aside class="left-panel">
+      <div class="panel-copy">
+        <h1 class="panel-title">Teplota</h1>
+        <div class="mode-switch" role="tablist" aria-label="Režim simulace">
+          <button
+            type="button"
+            class="mode-switch__btn is-active"
+            data-app-mode="heating"
+            role="tab"
+            aria-selected="true"
+          >
+            Ohřev
+          </button>
+          <button
+            type="button"
+            class="mode-switch__btn"
+            data-app-mode="cooling"
+            role="tab"
+            aria-selected="false"
+          >
+            Měření
+          </button>
         </div>
       </div>
 
-      <div class="gold-brick-wrap" id="gold-subject" hidden>
-        <div class="gold-scene">
-          <img
-            class="gold-brick"
-            src="assets/gold-brick.svg"
-            width="148"
-            height="88"
-            alt="Zlatá cihla"
-          />
-          <div class="gold-detail" aria-label="Detail částic zlata">
-            <canvas id="gold-particles" class="gold-particles"></canvas>
+      <div class="heating-panel">
+        <div class="subject-control" role="group" aria-label="Těleso na hořáku">
+          <button
+            type="button"
+            class="subject-btn"
+            data-subject="gold"
+            aria-pressed="false"
+          >
+            Zlato
+          </button>
+          <button
+            type="button"
+            class="subject-btn is-active"
+            data-subject="water"
+            aria-pressed="true"
+          >
+            Voda
+          </button>
+          <button
+            type="button"
+            class="subject-btn"
+            data-subject="gas"
+            aria-pressed="false"
+          >
+            Plyn
+          </button>
+        </div>
+        <div class="panel-actions">
+          <button
+            type="button"
+            id="burner-toggle"
+            class="action-btn"
+            aria-pressed="false"
+          >
+            Zapnout hořák
+          </button>
+        </div>
+      </div>
+
+      <div class="cooling-panel">
+        <div class="panel-actions">
+          <button
+            type="button"
+            id="cooling-toggle"
+            class="action-btn action-btn--primary"
+            aria-pressed="false"
+          >
+            Nechat ochladit
+          </button>
+        </div>
+        <div class="stopwatch" aria-live="polite">
+          <span class="stopwatch-label">Čas</span>
+          <time class="stopwatch-time" id="cooling-stopwatch" datetime="PT0S">0 s</time>
+        </div>
+        <div class="panel-actions cooling-reset-row">
+          <button type="button" id="cooling-reset-btn" class="action-btn graph-secondary">
+            Reset
+          </button>
+          <button
+            type="button"
+            id="ambient-temp-btn"
+            class="action-btn graph-secondary"
+          >
+            Okolní teplota
+          </button>
+        </div>
+        <div class="panel-actions">
+          <button
+            type="button"
+            id="cooling-graph-btn"
+            class="action-btn graph-btn"
+            aria-pressed="false"
+          >
+            Zobrazit graf
+          </button>
+        </div>
+        <div class="graph-tools" id="cooling-graph-tools" aria-label="Nástroje grafu">
+          <div class="panel-actions graph-actions">
+            <button type="button" class="action-btn" id="cooling-chart-save-btn">Uložit</button>
+            <button type="button" class="action-btn graph-secondary" id="cooling-chart-reset-btn">
+              Reset
+            </button>
+            <button
+              type="button"
+              class="action-btn graph-secondary"
+              id="cooling-chart-fit-btn"
+              aria-pressed="false"
+              disabled
+            >
+              Proložit
+            </button>
+          </div>
+          <div
+            class="panel-actions graph-fit-mode-row"
+            id="cooling-chart-fit-mode-row"
+            aria-label="Typ proložení"
+          >
+            <button
+              type="button"
+              id="cooling-chart-fit-mode-curve-btn"
+              class="action-btn graph-secondary is-active"
+              aria-pressed="true"
+            >
+              Křivka
+            </button>
+            <button
+              type="button"
+              id="cooling-chart-fit-mode-polyline-btn"
+              class="action-btn graph-secondary"
+              aria-pressed="false"
+            >
+              Lomená čára
+            </button>
           </div>
         </div>
       </div>
+    </aside>
 
-      <div class="gas-wrap" id="gas-subject" hidden>
-        <div class="gas-scene">
-          <object
-            id="gas-vessel"
-            class="gas-vessel"
-            type="image/svg+xml"
-            data="assets/gas-vessel.svg"
-            width="320"
-            height="250"
-            aria-label="Nádoba s plynem"
-          ></object>
-          <div class="gas-detail" aria-label="Detail částic plynu">
-            <canvas id="gas-particles" class="gas-particles"></canvas>
+    <div class="workspace">
+      <div class="board-stage" aria-label="Simulace teploty">
+        <p class="ambient-temp-label" id="ambient-temp-label">Okolní teplota: 22 °C</p>
+        <div class="sim-stage">
+          <div id="thermometer" class="thermometer" aria-label="Teploměr">
+            <svg viewBox="0 0 56 130" aria-hidden="true">
+              <rect class="tube-bg" x="18" y="8" width="20" height="118" rx="10" />
+              <rect class="tube-inner" x="22" y="12" width="12" height="110" rx="6" />
+              <rect id="mercury-column" class="mercury" x="24" y="118" width="8" height="4" rx="4" />
+            </svg>
+            <div id="temp-readout" class="temp-readout">teplota</div>
+          </div>
+
+          <div class="cup-wrap" id="water-subject">
+            <div id="lottie" class="lottie" aria-label="Hrníček s vodou"></div>
+            <div class="water-detail" aria-label="Detail částic vody">
+              <canvas id="water-particles" class="water-particles"></canvas>
+            </div>
+          </div>
+
+          <div class="gold-brick-wrap" id="gold-subject" hidden>
+            <div class="gold-scene">
+              <img
+                class="gold-brick"
+                src="assets/gold-brick.svg"
+                width="148"
+                height="88"
+                alt="Zlatá cihla"
+              />
+              <div class="gold-detail" aria-label="Detail částic zlata">
+                <canvas id="gold-particles" class="gold-particles"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="gas-wrap" id="gas-subject" hidden>
+            <div class="gas-scene">
+              <object
+                id="gas-vessel"
+                class="gas-vessel"
+                type="image/svg+xml"
+                data="assets/gas-vessel.svg"
+                width="320"
+                height="250"
+                aria-label="Nádoba s plynem"
+              ></object>
+              <div class="gas-detail" aria-label="Detail částic plynu">
+                <canvas id="gas-particles" class="gas-particles"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="burner-wrap">
+            <object
+              id="burner"
+              class="burner"
+              type="image/svg+xml"
+              data="assets/burner.svg"
+              width="113"
+              height="116"
+              aria-label="Hořák"
+            ></object>
           </div>
         </div>
-      </div>
-
-      <div class="burner-wrap">
-        <object
-          id="burner"
-          class="burner"
-          type="image/svg+xml"
-          data="assets/burner.svg"
-          width="113"
-          height="116"
-          aria-label="Hořák"
-        ></object>
+        <div class="cooling-chart-wrap" id="cooling-chart-wrap">
+          <svg
+            id="cooling-chart"
+            class="cooling-chart-svg"
+            role="img"
+            aria-label="Graf závislosti teploty vody na čase"
+          ></svg>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="controls">
-      <button
-        type="button"
-        id="burner-toggle"
-        class="burner-toggle"
-        aria-pressed="false"
-      >
-        Zapnout hořák
-      </button>
+  <div id="ambient-keypad-overlay" class="table-keypad-overlay" hidden>
+    <div
+      class="table-keypad-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ambient-keypad-title"
+    >
+      <p id="ambient-keypad-title" class="table-keypad-panel__title">Okolní teplota</p>
+      <div
+        id="ambient-keypad-display"
+        class="table-keypad-panel__display"
+        aria-live="polite"
+      ></div>
+      <p id="ambient-keypad-error" class="table-keypad-panel__error" hidden></p>
+      <div class="table-math-keypad" id="ambient-math-keypad" aria-label="Matematická klávesnice">
+        <div class="table-math-keypad__grid">
+          <button class="table-math-keypad__key" type="button" data-value="7">7</button>
+          <button class="table-math-keypad__key" type="button" data-value="8">8</button>
+          <button class="table-math-keypad__key" type="button" data-value="9">9</button>
+          <button class="table-math-keypad__key" type="button" data-value="4">4</button>
+          <button class="table-math-keypad__key" type="button" data-value="5">5</button>
+          <button class="table-math-keypad__key" type="button" data-value="6">6</button>
+          <button class="table-math-keypad__key" type="button" data-value="1">1</button>
+          <button class="table-math-keypad__key" type="button" data-value="2">2</button>
+          <button class="table-math-keypad__key" type="button" data-value="3">3</button>
+          <button
+            class="table-math-keypad__key table-math-keypad__key--wide"
+            type="button"
+            data-value="0"
+          >
+            0
+          </button>
+          <button
+            class="table-math-keypad__key"
+            type="button"
+            data-action="clear"
+            aria-label="Smazat vše"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14zM10 11v6M14 11v6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="table-keypad-panel__actions">
+        <button
+          type="button"
+          id="ambient-keypad-cancel"
+          class="table-keypad-panel__action table-keypad-panel__cancel"
+          aria-label="Zavřít bez uložení"
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              d="M18 6L6 18M6 6l12 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="ambient-keypad-confirm"
+          class="table-keypad-panel__action table-keypad-panel__confirm"
+          aria-label="Vložit hodnotu"
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              d="M5 12.5l5 5L19 7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
-  </main>
+  </div>
 
   <script src="main.js"></script>
 </body>
