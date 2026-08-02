@@ -190,7 +190,8 @@ function resizeParticleCanvas(canvas) {
   canvas.height = Math.round(size * dpr);
 }
 
-function clipParticleCanvasToCircle(ctx, size) {
+function clipParticleCanvasToCircle(ctx, canvas) {
+  const size = canvas.width;
   ctx.beginPath();
   ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
   ctx.clip();
@@ -244,7 +245,7 @@ function drawParticleDetail({
 
   ctx.clearRect(0, 0, size, size);
   ctx.save();
-  clipParticleCanvasToCircle(ctx, size);
+  clipParticleCanvasToCircle(ctx, canvas);
 
   for (const particle of grid) {
     const baseX = margin + particle.col * stepX;
@@ -316,7 +317,7 @@ function drawGasParticleDetail(deltaMs) {
 
   ctx.clearRect(0, 0, size, size);
   ctx.save();
-  clipParticleCanvasToCircle(ctx, size);
+  clipParticleCanvasToCircle(ctx, canvas);
 
   for (const particle of gasParticles) {
     particle.vx += (Math.random() - 0.5) * wander * dt;
@@ -401,7 +402,7 @@ function drawWaterParticleDetail(deltaMs) {
 
   ctx.clearRect(0, 0, size, size);
   ctx.save();
-  clipParticleCanvasToCircle(ctx, size);
+  clipParticleCanvasToCircle(ctx, canvas);
 
   for (const particle of waterParticles) {
     particle.vx += (Math.random() - 0.5) * wander * dt;

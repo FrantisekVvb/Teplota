@@ -684,7 +684,8 @@ button {
 .water-particles {
   display: block;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
+  height: auto;
 }
 
 .cup-wrap[hidden],
@@ -722,7 +723,8 @@ button {
 .gold-particles {
   display: block;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
+  height: auto;
 }
 
 .gold-brick {
@@ -764,7 +766,8 @@ button {
 .gas-particles {
   display: block;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
+  height: auto;
 }
 
 .gas-vessel {
