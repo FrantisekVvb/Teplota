@@ -183,41 +183,21 @@ function buildGasParticles() {
 function resizeParticleCanvas(canvas) {
   if (!canvas) return;
 
-  const host = canvas.parentElement || canvas;
-  const rect = host.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
+  const size = Math.max(1, Math.round(Math.min(rect.width, rect.height)));
   const dpr = window.devicePixelRatio || 1;
-  const cssSize = Math.max(1, Math.min(rect.width, rect.height));
-  const pixelSize = Math.max(1, Math.round(cssSize * dpr));
-  canvas.width = pixelSize;
-  canvas.height = pixelSize;
+  canvas.width = Math.round(size * dpr);
+  canvas.height = Math.round(size * dpr);
 }
 
-function clipParticleCanvasToCircle(ctx, canvas) {
-  const rect = canvas.getBoundingClientRect();
-  const pixelW = canvas.width;
-  const pixelH = canvas.height;
-  const cssW = Math.max(rect.width, 1);
-  const cssH = Math.max(rect.height, 1);
-  const scaleX = pixelW / cssW;
-  const scaleY = pixelH / cssH;
-  const cx = cssW / 2;
-  const cy = cssH / 2;
-  const rx = cssW / 2;
-  const ry = cssH / 2;
-
+function clipParticleCanvasToCircle(ctx, size) {
   ctx.beginPath();
-  if (Math.abs(cssW - cssH) < 0.5) {
-    ctx.arc(cx * scaleX, cy * scaleY, Math.min(rx, ry) * scaleX, 0, Math.PI * 2);
-  } else {
-    ctx.ellipse(cx * scaleX, cy * scaleY, rx * scaleX, ry * scaleY, 0, 0, Math.PI * 2);
-  }
+  ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
   ctx.clip();
 }
 
 function particleCanvasScale(canvas) {
-  const rect = canvas.getBoundingClientRect();
-  const cssSize = Math.max(rect.width, rect.height, 1);
-  return canvas.width / cssSize;
+  return canvas.width / (canvas.getBoundingClientRect().width || canvas.width);
 }
 
 function resizeGoldParticleCanvas() {
@@ -268,7 +248,7 @@ function drawParticleDetail({
 
   ctx.clearRect(0, 0, size, size);
   ctx.save();
-  clipParticleCanvasToCircle(ctx, canvas);
+  clipParticleCanvasToCircle(ctx, size);
 
   for (const particle of grid) {
     const baseX = margin + particle.col * stepX;
@@ -340,7 +320,7 @@ function drawGasParticleDetail(deltaMs) {
 
   ctx.clearRect(0, 0, size, size);
   ctx.save();
-  clipParticleCanvasToCircle(ctx, canvas);
+  clipParticleCanvasToCircle(ctx, size);
 
   for (const particle of gasParticles) {
     particle.vx += (Math.random() - 0.5) * wander * dt;
@@ -425,7 +405,7 @@ function drawWaterParticleDetail(deltaMs) {
 
   ctx.clearRect(0, 0, size, size);
   ctx.save();
-  clipParticleCanvasToCircle(ctx, canvas);
+  clipParticleCanvasToCircle(ctx, size);
 
   for (const particle of waterParticles) {
     particle.vx += (Math.random() - 0.5) * wander * dt;
