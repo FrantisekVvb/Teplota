@@ -40,10 +40,11 @@ button {
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   padding: 8px;
   background: var(--bg);
+  overflow: hidden;
 }
 
 .left-panel {
@@ -399,11 +400,11 @@ button {
   z-index: 1;
   margin-left: calc(var(--panel-w) + 24px);
   width: calc(100% - var(--panel-w) - 24px);
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: calc(100dvh - 16px);
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   padding: 0 0 0 8px;
 }
 
@@ -417,33 +418,32 @@ button {
   background: #ffffff;
 }
 
-.sim-stage {
+.sim-fit {
   position: absolute;
   inset: 0;
-  width: min(92%, 560px);
-  aspect-ratio: 1;
-  margin: auto;
-  top: 50%;
+  overflow: visible;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.app-root[data-cooling-view="graph"] .sim-fit {
+  display: none;
+}
+
+.sim-stage {
+  position: absolute;
   left: 50%;
-  transform: translate(calc(-42% - 30px), -54%) scale(1.06);
+  top: 50%;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  transform: translate(calc(-42% - 30px), -54%);
   transform-origin: center center;
   pointer-events: none;
 }
 
-.app-root[data-app-mode="cooling"] .board-stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .app-root[data-app-mode="cooling"] .sim-stage {
-  position: relative;
-  inset: auto;
-  top: auto;
-  left: auto;
-  margin: 0;
-  width: min(78%, 480px);
-  transform: scale(1.06) translateX(38px);
+  transform: translateX(38px);
 }
 .cup-wrap {
   position: absolute;
@@ -665,7 +665,7 @@ button {
   position: absolute;
   left: 79.54%;
   top: 69.4%;
-  width: calc(min(92vw, 560px) * 0.346);
+  width: 34.6%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border: 4.5px solid #2a2a2a;
@@ -714,7 +714,7 @@ button {
 
 .gold-detail {
   position: relative;
-  width: calc(min(92vw, 560px) * 0.346);
+  width: calc(560px * 0.346);
   aspect-ratio: 1;
   border: 4.5px solid #2a2a2a;
   border-radius: 50%;
@@ -751,7 +751,7 @@ button {
 
 .gas-detail {
   position: relative;
-  width: calc(min(92vw, 560px) * 0.346);
+  width: calc(560px * 0.346);
   aspect-ratio: 1;
   border: 4.5px solid #2a2a2a;
   border-radius: 50%;
@@ -870,7 +870,14 @@ button {
     margin-left: 0;
     width: 100%;
     padding: 0;
-    min-height: min(70vh, 560px);
+    height: auto;
+    flex: 1;
+    min-height: min(52vh, 420px);
+  }
+
+  .board-stage {
+    flex: 1;
+    min-height: min(52vh, 420px);
   }
 
   body,
@@ -881,6 +888,8 @@ button {
   .app-root {
     display: flex;
     flex-direction: column;
+    height: auto;
+    min-height: 100dvh;
     overflow: auto;
   }
 }

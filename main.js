@@ -34,6 +34,9 @@ const goldParticlesCanvas = document.getElementById('gold-particles');
 const waterParticlesCanvas = document.getElementById('water-particles');
 const gasParticlesCanvas = document.getElementById('gas-particles');
 const subjectButtons = [...document.querySelectorAll('.subject-btn')];
+const boardStageEl = document.querySelector('.board-stage');
+const simFitEl = document.querySelector('.sim-fit');
+const simStageEl = document.querySelector('.sim-stage');
 
 const TEMP_START = 1;
 const TEMP_END = 99;
@@ -198,6 +201,128 @@ function clipParticleCanvasToCircle(ctx, size) {
 
 function particleCanvasScale(canvas) {
   return canvas.width / (canvas.getBoundingClientRect().width || canvas.width);
+}
+
+const SIM_FIT_MARGIN = 20;
+const SIM_FIT_MAX_SCALE = 1.06;
+let simFitRaf = null;
+
+function expandSimBounds(rect, state) {
+  if (rect.width < 1 && rect.height < 1) return;
+  state.hasBounds = true;
+  state.minX = Math.min(state.minX, rect.left);
+  state.minY = Math.min(state.minY, rect.top);
+  state.maxX = Math.max(state.maxX, rect.right);
+  state.maxY = Math.max(state.maxY, rect.bottom);
+}
+
+function getSimVisualBounds() {
+  if (!simStageEl) return null;
+
+  const state = {
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+    hasBounds: false,
+  };
+
+  for (const node of simStageEl.children) {
+    if (!(node instanceof HTMLElement)) continue;
+    if (node.hidden) continue;
+
+    const style = getComputedStyle(node);
+    if (style.display === 'none' || style.visibility === 'hidden') continue;
+
+    // gas-wrap fills the stage; measure the actual vessel + particle circle.
+    if (node.classList.contains('gas-wrap')) {
+      const scene = node.querySelector('.gas-scene');
+      if (scene) expandSimBounds(scene.getBoundingClientRect(), state);
+      continue;
+    }
+
+    expandSimBounds(node.getBoundingClientRect(), state);
+
+    // Absolute particle loupe can sit outside the subject wrap box.
+    if (node.classList.contains('cup-wrap')) {
+      const detail = node.querySelector('.water-detail');
+      if (detail && getComputedStyle(detail).display !== 'none') {
+        expandSimBounds(detail.getBoundingClientRect(), state);
+      }
+    }
+  }
+
+  if (!state.hasBounds) return null;
+
+  return {
+    width: state.maxX - state.minX,
+    height: state.maxY - state.minY,
+    minX: state.minX,
+    minY: state.minY,
+    maxX: state.maxX,
+    maxY: state.maxY,
+  };
+}
+
+function updateSimStageFit() {
+  if (!boardStageEl || !simFitEl) return;
+  if (appRoot?.dataset.coolingView === 'graph') return;
+
+  // Measure at identity transform, then fit into the board.
+  // Horizontally centered, vertically pinned to the bottom (like water).
+  simFitEl.style.transformOrigin = '0 0';
+  simFitEl.style.transform = 'none';
+
+  const bounds = getSimVisualBounds();
+  if (!bounds || bounds.width <= 0 || bounds.height <= 0) return;
+
+  const boardRect = boardStageEl.getBoundingClientRect();
+  let topInset = SIM_FIT_MARGIN;
+
+  if (
+    appMode === 'cooling' &&
+    ambientTempLabel &&
+    getComputedStyle(ambientTempLabel).display !== 'none'
+  ) {
+    const labelRect = ambientTempLabel.getBoundingClientRect();
+    topInset = Math.max(topInset, labelRect.bottom - boardRect.top + 8);
+  }
+
+  const availX = SIM_FIT_MARGIN;
+  const availY = topInset;
+  const availW = boardRect.width - SIM_FIT_MARGIN * 2;
+  const availH = boardRect.height - topInset - SIM_FIT_MARGIN;
+  if (availW <= 0 || availH <= 0) return;
+
+  const contentX = bounds.minX - boardRect.left;
+  const contentY = bounds.minY - boardRect.top;
+  const contentW = bounds.width;
+  const contentH = bounds.height;
+
+  const fitScale = Math.max(
+    0.05,
+    Math.min(availW / contentW, availH / contentH, SIM_FIT_MAX_SCALE),
+  );
+
+  const contentCx = contentX + contentW / 2;
+  const contentBottom = contentY + contentH;
+  const availCx = availX + availW / 2;
+  const availBottom = availY + availH;
+  const tx = availCx - contentCx * fitScale;
+  const ty = availBottom - contentBottom * fitScale;
+
+  simFitEl.style.transform = `translate(${tx}px, ${ty}px) scale(${fitScale})`;
+}
+
+function scheduleSimStageFit() {
+  if (simFitRaf !== null) cancelAnimationFrame(simFitRaf);
+  simFitRaf = requestAnimationFrame(() => {
+    simFitRaf = null;
+    updateSimStageFit();
+    resizeGoldParticleCanvas();
+    resizeWaterParticleCanvas();
+    resizeGasParticleCanvas();
+  });
 }
 
 function resizeGoldParticleCanvas() {
@@ -990,6 +1115,8 @@ function setSubject(subject) {
     drawGasParticleDetail(0);
     ensureGasVesselState();
   }
+
+  scheduleSimStageFit();
 }
 
 function toggleBurner() {
@@ -1835,6 +1962,7 @@ function setCoolingGraphVisible(visible) {
   updateChartFitControls();
   scheduleCoolingChartRedraw();
   syncAmbientTempControls();
+  scheduleSimStageFit();
 }
 
 function showCoolingStage() {
@@ -1869,6 +1997,7 @@ function setAppMode(mode) {
   }
 
   applySimulationState();
+  scheduleSimStageFit();
 }
 
 burnerToggle.addEventListener('click', toggleBurner);
@@ -1953,9 +2082,7 @@ resizeGoldParticleCanvas();
 resizeWaterParticleCanvas();
 resizeGasParticleCanvas();
 window.addEventListener('resize', () => {
-  resizeGoldParticleCanvas();
-  resizeWaterParticleCanvas();
-  resizeGasParticleCanvas();
+  scheduleSimStageFit();
   if (activeSubject === 'water' && appMode === 'heating') {
     drawWaterParticleDetail(0);
   } else if (activeSubject === 'gold') {
@@ -1965,6 +2092,13 @@ window.addEventListener('resize', () => {
   }
   scheduleCoolingChartRedraw();
 });
+if (boardStageEl && typeof ResizeObserver !== 'undefined') {
+  const boardStageObserver = new ResizeObserver(() => {
+    scheduleSimStageFit();
+  });
+  boardStageObserver.observe(boardStageEl);
+}
+scheduleSimStageFit();
 setSubject('water');
 syncCoolingButton();
 updateCoolingStopwatch();
@@ -2034,7 +2168,7 @@ loadLottieAnimation(lottieEl, 'cup-water-detail.json').then((waterAnimation) => 
 
   if (anim) {
     particlePhaseMs = 0;
-    resizeWaterParticleCanvas();
+    scheduleSimStageFit();
     applySimulationState();
     updateParticleAnimation(0);
   }
